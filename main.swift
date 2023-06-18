@@ -86,11 +86,6 @@ class ScrollingTextField: NSTextField {
         frame.origin.x -= 10
         self.frame = frame
 
-        // テキストフィールドがウィンドウの外に完全に出たら、位置をリセット
-        if frame.origin.x + frame.size.width < 0 {
-            frame.origin.x = self.superview!.frame.size.width
-            self.frame = frame
-        }
     }
 }
 
@@ -128,29 +123,53 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         appMenu.addItem(quitMenuItem)
         statusItem.menu = appMenu
 
-        // ScrollingTextFieldを作成
-        let scrollingTextField = ScrollingTextField(frame: NSRect(x: 0, y: 0, width: 400, height: 60))
-        scrollingTextField.stringValue = "Hello, World!"
-        scrollingTextField.isEditable = false
-        scrollingTextField.backgroundColor = NSColor.clear
+        // 複数のコメントを出力
+        let comments = ["Comment 1", "Comment 2", "Comment 3"]
+        outputComments(comments)
 
-        // テキストフィールドのフォントとテキストカラーを設定
-        let font = NSFont.systemFont(ofSize: 36)
-        let textColor = NSColor.white
-        scrollingTextField.font = font
-        scrollingTextField.textColor = textColor
-
-        // テキストフィールドの位置を右上端に設定
-        if let contentView = window.contentView {
-            let textFieldWidth = scrollingTextField.frame.size.width
-            let textFieldHeight = scrollingTextField.frame.size.height
-            let x = contentView.bounds.maxX - textFieldWidth
-            let y = contentView.bounds.maxY - textFieldHeight
-            scrollingTextField.frame = NSRect(x: x, y: y, width: textFieldWidth, height: textFieldHeight)
+        // 3秒後にコメントを追加
+        let delay_comments = ["Comment 1", "Comment 2", "Comment 3"]
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            outputComments(delay_comments)
         }
 
-        // ウィンドウにテキストフィールドを追加
-        window.contentView?.addSubview(scrollingTextField)
+        func outputComments(_ comments: [String]) {
+            guard let contentView = window.contentView else {
+                return
+            }
+            let textFieldHeight: CGFloat = 60
+            var yOffset: CGFloat = contentView.bounds.maxY - textFieldHeight
+
+            for comment in comments {
+
+                // ScrollingTextFieldを作成
+                let scrollingTextField = ScrollingTextField(frame: NSRect(x: 0, y: 0, width: 400, height: 60))
+                scrollingTextField.stringValue = comment
+                scrollingTextField.isEditable = false
+                scrollingTextField.backgroundColor = NSColor.clear
+
+                // テキストフィールドのフォントとテキストカラーを設定
+                let font = NSFont.systemFont(ofSize: 36)
+                let textColor = NSColor.white
+                scrollingTextField.font = font
+                scrollingTextField.textColor = textColor
+
+                // テキストフィールドの位置を右上端に設定
+                if let contentView = window.contentView {
+                    let textFieldWidth = scrollingTextField.frame.size.width
+                    let textFieldHeight = scrollingTextField.frame.size.height
+                    let x = contentView.bounds.maxX - textFieldWidth
+                    scrollingTextField.frame = NSRect(x: x, y: yOffset, width: textFieldWidth, height: textFieldHeight)
+                    yOffset -= textFieldHeight
+                }
+
+                // ウィンドウにテキストフィールドを追加
+                window.contentView?.addSubview(scrollingTextField)
+            }
+        }
+
+
+
     }
 
     @objc func quitClicked() {
